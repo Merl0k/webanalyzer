@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebAnalyzer — Історія</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html">web<span>.</span>analyzer</a>
+  <div class="nav-sep"></div>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html"><i class="ti ti-search"></i><span>Пошук</span></a>
+    <a class="nav-link active" href="history.html"><i class="ti ti-history"></i><span>Історія</span></a>
+    <a class="nav-link" href="stats.html"><i class="ti ti-chart-bar"></i><span>Статистика</span></a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-eyebrow">архів · запити</div>
+    <h1 class="page-title">Історія <span>пошуків</span></h1>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem" class="anim-1">
+    <div class="status-bar" id="statusBar" style="flex:1;margin-right:.75rem">
+      <div class="dot loading" id="statusDot"></div>
+      <span id="statusText">Завантаження…</span>
+    </div>
+    <button class="btn btn-ghost" onclick="loadHistory()">
+      <i class="ti ti-refresh"></i> Оновити
+    </button>
+  </div>
+  
+    <div class="tags-panel anim-2">
+    <div class="tags-panel-head">
+      <div class="tags-panel-title">
+        <i class="ti ti-tags"></i>
+        <span>Теги історії</span>
+      </div>
+
+      <div class="tag-create">
+        <input id="newTagName" class="tag-input" type="text" placeholder="Новий тег..." maxlength="32">
+        <input id="newTagColor" class="tag-color" type="color" value="#4fffb0">
+        <button class="btn btn-primary mini-btn" onclick="createTagFromInput()">
+          <i class="ti ti-plus"></i> Додати
+        </button>
+      </div>
+    </div>
+
+    <div class="tag-filter-list" id="tagFilterList">
+      <button class="tag-filter active" onclick="setTagFilter(null)">
+        Усі
+      </button>
+    </div>
+  </div>
+
+  <div class="compare-panel anim-2" id="comparePanel" style="display:none">
+    <div class="compare-panel-info">
+      <i class="ti ti-git-compare"></i>
+      <span id="compareCountText">Обрано 0 результатів</span>
+    </div>
+
+    <div class="compare-panel-actions">
+      <button class="btn btn-primary mini-btn" id="compareBtn" onclick="compareSelected()" disabled>
+        <i class="ti ti-chart-radar"></i> Порівняти
+      </button>
+
+      <button class="btn btn-ghost mini-btn" onclick="clearCompareSelection()">
+        <i class="ti ti-x"></i> Очистити
+      </button>
+    </div>
+  </div>
+
+  <div id="compareResult" class="compare-result" style="display:none"></div>
+
+  <div id="historyArea" class="anim-2">
+    <div class="empty">
+      <i class="ti ti-clock"></i>
+      <p>Ще немає збережених запитів</p>
+    </div>
+  </div>
+
+  <div id="pager" style="display:flex;gap:.5rem;justify-content:center;margin-top:1.5rem"></div>
+
+</div>
+
+<!-- MODAL -->
+<div id="modalBackdrop" style="display:none" onclick="closeModal(event)">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<script src="js/particles.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/auth-client.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/history.js"></script>
+</body>
+</html>

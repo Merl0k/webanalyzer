@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebAnalyzer — Вхід</title>
+
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css"/>
+</head>
+
+<body>
+<canvas id="particles-canvas"></canvas>
+
+<div class="auth-page">
+
+  <a class="auth-back-link" href="index.html">
+    <i class="ti ti-arrow-left"></i>
+    На головну
+  </a>
+
+  <main class="auth-shell">
+
+    <section class="auth-hero">
+      <div class="auth-logo">web<span>.</span>analyzer</div>
+
+      <div class="auth-hero-content">
+        <div class="auth-kicker">
+          <i class="ti ti-sparkles"></i>
+          AI Search Pipeline
+        </div>
+
+        <h1>Аналізуйте веб-джерела швидше та зберігайте результати</h1>
+
+        <p>
+          Увійдіть в акаунт, щоб зберігати історію аналізів, керувати API-ключами,
+          експортувати результати та створювати публічні посилання.
+        </p>
+
+        <div class="auth-feature-grid">
+          <div class="auth-feature">
+            <i class="ti ti-lock"></i>
+            <span>JWT + httpOnly cookies</span>
+          </div>
+
+          <div class="auth-feature">
+            <i class="ti ti-key"></i>
+            <span>Зашифровані API-ключі</span>
+          </div>
+
+          <div class="auth-feature">
+            <i class="ti ti-history"></i>
+            <span>Історія аналізів</span>
+          </div>
+
+          <div class="auth-feature">
+            <i class="ti ti-file-export"></i>
+            <span>Export JSON / MD / PDF</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-card">
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">
+          <i class="ti ti-login"></i>
+          Увійти
+        </button>
+
+        <button class="auth-tab" id="tabReg" onclick="switchTab('register')">
+          <i class="ti ti-user-plus"></i>
+          Реєстрація
+        </button>
+      </div>
+
+      <div id="authError" class="auth-error"></div>
+
+      <div id="loginForm" class="auth-form auth-form-visible">
+        <div class="auth-form-head">
+          <h2 class="auth-title">Ласкаво просимо</h2>
+          <p class="auth-sub">Увійдіть, щоб продовжити роботу з WebAnalyzer</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Email</label>
+          <div class="input-wrap">
+            <i class="ti ti-mail"></i>
+            <input class="input" id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginPwd">Пароль</label>
+          <div class="input-wrap">
+            <i class="ti ti-lock"></i>
+            <input class="input" id="loginPwd" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+          </div>
+        </div>
+
+        <button class="btn btn-primary auth-submit" id="loginBtn" onclick="doLogin()">
+          <i class="ti ti-login"></i>
+          Увійти
+        </button>
+      </div>
+
+      <div id="registerForm" class="auth-form" style="display:none">
+        <div class="auth-form-head">
+          <h2 class="auth-title">Створити акаунт</h2>
+          <p class="auth-sub">Акаунт потрібен для історії, профілю та експорту</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Email</label>
+          <div class="input-wrap">
+            <i class="ti ti-mail"></i>
+            <input class="input" id="regEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPwd">Пароль</label>
+          <div class="input-wrap">
+            <i class="ti ti-lock"></i>
+            <input class="input" id="regPwd" type="password" placeholder="мінімум 8 символів" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()"/>
+          </div>
+        </div>
+
+        <button class="btn btn-primary auth-submit" id="regBtn" onclick="doRegister()">
+          <i class="ti ti-user-plus"></i>
+          Зареєструватись
+        </button>
+      </div>
+
+      <div class="auth-footer">
+        <span>Можна переглянути сайт без входу</span>
+        <a href="index.html">Повернутись</a>
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="js/particles.js"></script>
+<script src="js/theme.js"></script>
+
+<script>
+const API = '/api/v1';
+
+function switchTab(tab){
+  const isLogin = tab === 'login';
+
+  document.getElementById('loginForm').style.display = isLogin ? '' : 'none';
+  document.getElementById('registerForm').style.display = isLogin ? 'none' : '';
+
+  document.getElementById('loginForm').classList.toggle('auth-form-visible', isLogin);
+  document.getElementById('registerForm').classList.toggle('auth-form-visible', !isLogin);
+
+  document.getElementById('tabLogin').className = isLogin ? 'auth-tab active' : 'auth-tab';
+  document.getElementById('tabReg').className = isLogin ? 'auth-tab' : 'auth-tab active';
+
+  showError('');
+}
+
+function showError(msg){
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.toggle('show', !!msg);
+}
+
+async function doLogin(){
+  const btn = document.getElementById('loginBtn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Вхід…';
+  showError('');
+
+  try {
+    const r = await fetch(API + '/auth/login', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        email: document.getElementById('loginEmail').value,
+        password: document.getElementById('loginPwd').value
+      })
+    });
+
+    const d = await r.json();
+
+    if (!r.ok) {
+      showError(d.error || 'Помилка входу');
+      return;
+    }
+
+    localStorage.setItem('wa_user', JSON.stringify(d.user));
+    location.href = 'index.html';
+
+  } catch(e) {
+    showError('Сервер недоступний');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-login"></i> Увійти';
+  }
+}
+
+async function doRegister(){
+  const btn = document.getElementById('regBtn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Реєстрація…';
+  showError('');
+
+  try {
+    const r = await fetch(API + '/auth/register', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        email: document.getElementById('regEmail').value,
+        password: document.getElementById('regPwd').value
+      })
+    });
+
+    const d = await r.json();
+
+    if (!r.ok) {
+      showError(d.error || 'Помилка реєстрації');
+      return;
+    }
+
+    switchTab('login');
+    document.getElementById('loginEmail').value = document.getElementById('regEmail').value;
+    showError('');
+    alert('Акаунт створено! Тепер увійдіть.');
+
+  } catch(e) {
+    showError('Сервер недоступний');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-user-plus"></i> Зареєструватись';
+  }
+}
+</script>
+
+</body>
+</html>

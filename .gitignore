@@ -1,0 +1,43 @@
+# Environment files
+.env
+*.env
+backend/.env
+
+# Virtual environments
+.venv/
+venv/
+backend/.venv/
+backend/venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+backend/searches.db
+
+# Runtime folders
+backend/logs/
+backend/chroma_data/
+logs/
+chroma_data/
+
+# Build / coverage
+htmlcov/
+coverage.xml
+dist/
+build/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

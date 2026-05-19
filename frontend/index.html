@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebAnalyzer v3</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css"/>
+</head>
+<body>
+<canvas id="particles-canvas"></canvas>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html">web<span>.</span>analyzer</a>
+  <div class="nav-sep"></div>
+  <div class="nav-links">
+    <a class="nav-link active" href="index.html"><i class="ti ti-search"></i><span>Пошук</span></a>
+    <a class="nav-link" href="history.html"><i class="ti ti-history"></i><span>Історія</span></a>
+    <a class="nav-link" href="stats.html"><i class="ti ti-chart-bar"></i><span>Статистика</span></a>
+    <a class="nav-link" href="profile.html"><i class="ti ti-user-circle"></i><span>Профіль</span></a>
+  </div>
+  <div id="navUser" style="display:flex;align-items:center;gap:.75rem;margin-left:.5rem">
+    <span id="navEmail" style="font-size:12px;color:var(--text-3);font-family:'DM Mono',monospace;display:none"></span>
+    <button id="themeToggle" class="btn btn-ghost" title="Тема" style="font-size:12px;padding:.35rem .6rem;margin-right:.25rem"><i class="ti ti-color-swatch"></i></button>
+    <button class="btn btn-ghost" id="logoutBtn" style="font-size:12px;padding:.35rem .75rem;display:none" onclick="logout()"><i class="ti ti-logout"></i> Вийти</button>
+    <a class="btn btn-ghost" href="auth.html" id="loginBtn" style="font-size:12px;padding:.35rem .75rem"><i class="ti ti-login"></i> Увійти</a>
+  </div>
+</nav>
+
+<div class="page page-fade">
+  <div class="page-header anim-1">
+    <div class="page-eyebrow">веб-сервіс · v3.0</div>
+    <h1 class="page-title">Збір та аналіз <span>інформації з сайтів</span></h1>
+  </div>
+
+  <div class="card anim-2" style="margin-bottom:1rem">
+    <div class="card-body">
+      <div style="display:flex;gap:.6rem;margin-bottom:.75rem">
+        <input class="input" id="queryInput" placeholder="Введіть запит: тема, подія, технологія…" style="flex:1"/>
+        <button class="btn btn-primary" id="searchBtn" onclick="runSearch()"><i class="ti ti-search"></i> <span>Аналізувати</span></button>
+      </div>
+      <div class="depth-selector" id="depthSelector">
+        <button class="depth-btn" data-depth="fast" onclick="setDepth('fast')">⚡ Швидкий <span>5 джерел · ~15с</span></button>
+        <button class="depth-btn active" data-depth="standard" onclick="setDepth('standard')">🔍 Стандарт <span>10 джерел · ~40с</span></button>
+        <button class="depth-btn" data-depth="deep" onclick="setDepth('deep')">🌊 Глибокий <span>20 джерел · ~90с</span></button>
+      </div>
+      <div class="analysis-options">
+        <label class="select-label" for="langSelect">
+          <i class="ti ti-language"></i>
+          Мова відповіді
+        </label>
+
+        <select class="select" id="langSelect">
+          <option value="auto">Автоматично — мовою запиту</option>
+          <option value="ru">Русский</option>
+          <option value="uk">Українська</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div class="tags" id="exampleTags"></div>
+    </div>
+  </div>
+
+  <div class="status-bar anim-3" id="statusBar" style="margin-bottom:1rem">
+    <div class="dot" id="statusDot"></div>
+    <span id="statusText">Введіть запит і натисніть «Аналізувати»</span>
+  </div>
+
+  <div id="resultsArea" class="anim-4">
+    <div class="empty">
+      <i class="ti ti-world-search"></i>
+      <p>Сервіс збере інформацію з різних сайтів<br>та проведе повний AI-аналіз: резюме,<br>тональність і ключові факти.</p>
+    </div>
+  </div>
+</div>
+
+<!-- mobile nav removed: top nav contains the same links -->
+
+<script src="js/particles.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/auth-client.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

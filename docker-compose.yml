@@ -1,0 +1,104 @@
+x-backend-image: &backend-image
+  image: webanalyzer_v3-backend:latest
+  build:
+    context: ./backend
+
+x-backend-env: &backend-env
+  DATABASE_URL: postgresql+psycopg2://webanalyzer:secret@postgres:5432/webanalyzer
+  REDIS_URL: redis://redis:6379/0
+  FLASK_ENV: production
+  JWT_SECRET: ${JWT_SECRET}
+  ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: webanalyzer
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: webanalyzer
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U webanalyzer"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    <<: *backend-image
+    ports:
+      - "5000:5000"
+    environment:
+      <<: *backend-env
+    volumes:
+      - ./backend/logs:/app/logs
+      - chroma_data:/app/chroma_data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/api/v1/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  worker:
+    <<: *backend-image
+    command: celery -A app.tasks.pipeline_task.celery_app worker --loglevel=info --concurrency=2
+    environment:
+      <<: *backend-env
+    volumes:
+      - ./backend/logs:/app/logs
+      - chroma_data:/app/chroma_data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  flower:
+    <<: *backend-image
+    command: celery -A app.tasks.pipeline_task.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    environment:
+      <<: *backend-env
+    depends_on:
+      redis:
+        condition: service_healthy
+      worker:
+        condition: service_started
+    restart: unless-stopped
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  chroma_data:

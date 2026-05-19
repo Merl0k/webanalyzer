@@ -1,0 +1,39 @@
+# Virtual environments
+venv/
+.venv/
+*/venv/
+*/.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local databases / runtime data
+searches.db
+*.db
+*.sqlite
+*.sqlite3
+logs/
+chroma_data/
+
+# Git / env
+.git/
+.gitignore
+.env
+.env.*
+
+# Tests and local-only files
+tests/
+coverage.xml
+htmlcov/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

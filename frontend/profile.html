@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebAnalyzer — Профіль</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css"/>
+</head>
+<body>
+<canvas id="particles-canvas"></canvas>
+<nav class="nav">
+  <a class="nav-logo" href="index.html">web<span>.</span>analyzer</a>
+  <div class="nav-sep"></div>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html"><i class="ti ti-search"></i><span>Пошук</span></a>
+    <a class="nav-link" href="history.html"><i class="ti ti-history"></i><span>Історія</span></a>
+    <a class="nav-link" href="stats.html"><i class="ti ti-chart-bar"></i><span>Статистика</span></a>
+    <a class="nav-link active" href="profile.html"><i class="ti ti-user-circle"></i><span>Профіль</span></a>
+  </div>
+</nav>
+
+<div class="page page-fade">
+  <div class="page-header anim-1">
+    <div class="page-eyebrow">налаштування</div>
+    <h1 class="page-title">Профіль <span>та API ключі</span></h1>
+  </div>
+
+  <div class="card anim-2" style="margin-bottom:1rem">
+    <div class="card-head">
+      <div class="card-icon icon-blue"><i class="ti ti-user-circle"></i></div>
+      <div><div class="card-title" id="userEmail">Завантаження…</div><div class="card-sub">зареєстрований акаунт</div></div>
+      <button class="btn btn-danger" onclick="logout()" style="margin-left:auto;font-size:12px;padding:.35rem .75rem"><i class="ti ti-logout"></i> Вийти</button>
+    </div>
+  </div>
+
+  <div class="card anim-2" style="margin-bottom:1rem">
+    <div class="card-head">
+      <div class="card-icon icon-amber"><i class="ti ti-palette"></i></div>
+      <div><div class="card-title">Тема інтерфейсу</div><div class="card-sub">зберігається автоматично</div></div>
+    </div>
+    <div class="card-body">
+      <div class="theme-bar">
+        <button class="theme-btn" data-theme="dark"     title="Dark"      onclick="setTheme('dark')"></button>
+        <button class="theme-btn" data-theme="light"    title="Light"     onclick="setTheme('light')"></button>
+        <button class="theme-btn" data-theme="cyberpunk" title="Cyberpunk" onclick="setTheme('cyberpunk')"></button>
+        <button class="theme-btn" data-theme="ocean"    title="Ocean"     onclick="setTheme('ocean')"></button>
+        <button class="theme-btn" data-theme="sunset"   title="Sunset"    onclick="setTheme('sunset')"></button>
+      </div>
+      <div style="margin-top:.75rem;font-size:12px;color:var(--text-3)">Поточна: <span id="currentThemeName" style="color:var(--accent);font-family:'DM Mono',monospace">dark</span></div>
+    </div>
+  </div>
+
+  <div class="card anim-3">
+    <div class="card-head">
+      <div class="card-icon icon-amber"><i class="ti ti-key"></i></div>
+      <div><div class="card-title">API ключі</div><div class="card-sub">шифруються Fernet · не передаються в запитах</div></div>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:1rem">
+
+      <div class="provider-card">
+        <div class="provider-head">
+          <div class="provider-icon icon-blue" style="font-size:16px">✦</div>
+          <div class="provider-name">Google Gemini</div>
+          <div class="provider-status missing" id="st-gemini">не додано</div>
+        </div>
+        <div style="display:flex;gap:.5rem">
+          <input class="input" id="key-gemini" type="password" placeholder="AIza…" style="flex:1"/>
+          <select class="input" id="model-gemini" style="width:180px;flex-shrink:0">
+            <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+          </select>
+          <button class="btn btn-ghost" onclick="saveKey('gemini')" style="flex-shrink:0"><i class="ti ti-device-floppy"></i></button>
+          <button class="btn btn-danger" onclick="deleteKey('gemini')" style="flex-shrink:0"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+
+      <div class="provider-card">
+        <div class="provider-head">
+          <div class="provider-icon icon-green" style="font-size:14px;font-family:'DM Mono',monospace;font-weight:700">G</div>
+          <div class="provider-name">Groq</div>
+          <div class="provider-status missing" id="st-groq">не додано</div>
+        </div>
+        <div style="display:flex;gap:.5rem">
+          <input class="input" id="key-groq" type="password" placeholder="gsk_…" style="flex:1"/>
+          <select class="input" id="model-groq" style="width:180px;flex-shrink:0">
+            <option value="llama-3.3-70b-versatile">llama-3.3-70b</option>
+            <option value="llama-3.1-8b-instant">llama-3.1-8b</option>
+            <option value="mixtral-8x7b-32768">mixtral-8x7b</option>
+          </select>
+          <button class="btn btn-ghost" onclick="saveKey('groq')" style="flex-shrink:0"><i class="ti ti-device-floppy"></i></button>
+          <button class="btn btn-danger" onclick="deleteKey('groq')" style="flex-shrink:0"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+
+      <div class="provider-card">
+        <div class="provider-head">
+          <div class="provider-icon icon-amber" style="font-size:14px">🦙</div>
+          <div class="provider-name">Ollama (локально)</div>
+          <div class="provider-status missing" id="st-ollama">не додано</div>
+        </div>
+        <div style="display:flex;gap:.5rem">
+          <input class="input" id="key-ollama" type="text" placeholder="ollama (без ключа)" style="flex:1"/>
+          <select class="input" id="model-ollama" style="width:180px;flex-shrink:0">
+            <option value="qwen2.5:3b">qwen2.5:3b</option>
+            <option value="llama3.2:3b">llama3.2:3b</option>
+            <option value="mistral:7b">mistral:7b</option>
+          </select>
+          <button class="btn btn-ghost" onclick="saveKey('ollama')" style="flex-shrink:0"><i class="ti ti-device-floppy"></i></button>
+          <button class="btn btn-danger" onclick="deleteKey('ollama')" style="flex-shrink:0"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+
+      <p style="font-size:12px;color:var(--text-3)">* Ключі шифруються в базі даних. Ви більше не вводите ключ при кожному запиті.</p>
+    </div>
+  </div>
+</div>
+
+<nav class="mobile-nav">
+  <button class="mobile-nav-btn" onclick="location.href='index.html'"><i class="ti ti-search"></i>Пошук</button>
+  <button class="mobile-nav-btn" onclick="location.href='history.html'"><i class="ti ti-history"></i>Історія</button>
+  <button class="mobile-nav-btn" onclick="location.href='stats.html'"><i class="ti ti-chart-bar"></i>Стат</button>
+  <button class="mobile-nav-btn active" onclick="location.href='profile.html'"><i class="ti ti-user"></i>Профіль</button>
+</nav>
+
+<script src="js/particles.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/auth-client.js"></script>
+<script>
+const API = '/api/v1';
+
+async function init(){
+  const user = getUser();
+  if(!user){ location.href='auth.html'; return; }
+  document.getElementById('userEmail').textContent = user.email;
+  const t = localStorage.getItem('wa_theme')||'dark';
+  document.getElementById('currentThemeName').textContent = t;
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===t));
+  try{
+    const r = await fetch(API+'/profile/keys',{credentials:'include'});
+    if(r.status===401) return;
+    const keys = await r.json();
+    keys.forEach(k=>{
+      const el=document.getElementById('st-'+k.provider);
+      if(el){el.textContent='підключено';el.className='provider-status connected';}
+      const mi=document.getElementById('model-'+k.provider);
+      if(mi&&k.model) for(let o of mi.options) if(o.value===k.model){o.selected=true;break;}
+    });
+  }catch(e){}
+}
+
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('wa_theme',t);
+  document.getElementById('currentThemeName').textContent=t;
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===t));
+  try{ fetch(API+'/profile/theme',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme:t})}); }catch(e){}
+}
+
+async function saveKey(provider){
+  const key=document.getElementById('key-'+provider).value.trim();
+  const model=document.getElementById('model-'+provider).value;
+  if(!key&&provider!=='ollama'){alert('Введіть ключ');return;}
+  const k=key||'ollama';
+  try{
+    const r=await fetch(API+'/profile/keys',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({provider,key:k,model})});
+    const d=await r.json();
+    if(!r.ok){alert(d.error);return;}
+    const el=document.getElementById('st-'+provider);
+    el.textContent='підключено';el.className='provider-status connected';
+    document.getElementById('key-'+provider).value='';
+  }catch(e){alert('Помилка');}
+}
+
+async function deleteKey(provider){
+  if(!confirm('Видалити ключ '+provider+'?')) return;
+  await fetch(API+'/profile/keys/'+provider,{method:'DELETE',credentials:'include'});
+  const el=document.getElementById('st-'+provider);
+  el.textContent='не додано';el.className='provider-status missing';
+}
+
+init();
+</script>
+</body>
+</html>
