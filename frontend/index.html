@@ -21,7 +21,10 @@
   </div>
   <div id="navUser" style="display:flex;align-items:center;gap:.75rem;margin-left:.5rem">
     <span id="navEmail" style="font-size:12px;color:var(--text-3);font-family:'DM Mono',monospace;display:none"></span>
-    <button id="themeToggle" class="btn btn-ghost" title="Тема" style="font-size:12px;padding:.35rem .6rem;margin-right:.25rem"><i class="ti ti-color-swatch"></i></button>
+    <button id="themeToggle" class="theme-trigger" type="button" title="Змінити тему інтерфейсу">
+      <i class="ti ti-palette"></i>
+      <span class="theme-trigger-text">Тема</span>
+    </button>
     <button class="btn btn-ghost" id="logoutBtn" style="font-size:12px;padding:.35rem .75rem;display:none" onclick="logout()"><i class="ti ti-logout"></i> Вийти</button>
     <a class="btn btn-ghost" href="auth.html" id="loginBtn" style="font-size:12px;padding:.35rem .75rem"><i class="ti ti-login"></i> Увійти</a>
   </div>
@@ -40,10 +43,46 @@
         <button class="btn btn-primary" id="searchBtn" onclick="runSearch()"><i class="ti ti-search"></i> <span>Аналізувати</span></button>
       </div>
       <div class="depth-selector" id="depthSelector">
-        <button class="depth-btn" data-depth="fast" onclick="setDepth('fast')">⚡ Швидкий <span>5 джерел · ~15с</span></button>
-        <button class="depth-btn active" data-depth="standard" onclick="setDepth('standard')">🔍 Стандарт <span>10 джерел · ~40с</span></button>
-        <button class="depth-btn" data-depth="deep" onclick="setDepth('deep')">🌊 Глибокий <span>20 джерел · ~90с</span></button>
-      </div>
+  <button class="depth-btn" data-depth="fast" onclick="setDepth('fast')" aria-pressed="false">
+    <div class="depth-icon depth-fast">
+      <i class="ti ti-bolt"></i>
+    </div>
+
+    <div class="depth-content">
+      <strong>Швидкий</strong>
+      <span>5 джерел · ~15с</span>
+    </div>
+
+    <i class="ti ti-check depth-check"></i>
+  </button>
+
+  <button class="depth-btn active" data-depth="standard" onclick="setDepth('standard')" aria-pressed="true">
+    <div class="depth-icon depth-standard">
+      <i class="ti ti-search"></i>
+    </div>
+
+    <div class="depth-content">
+      <strong>Стандарт</strong>
+      <span>10 джерел · ~40с</span>
+    </div>
+
+    <i class="ti ti-check depth-check"></i>
+  </button>
+
+  <button class="depth-btn" data-depth="deep" onclick="setDepth('deep')" aria-pressed="false">
+    <div class="depth-icon depth-deep">
+      <i class="ti ti-waves-electricity"></i>
+    </div>
+
+    <div class="depth-content">
+      <strong>Глибокий</strong>
+      <span>20 джерел · ~90с</span>
+    </div>
+
+    <i class="ti ti-check depth-check"></i>
+  </button>
+</div>
+
       <div class="analysis-options">
         <label class="select-label" for="langSelect">
           <i class="ti ti-language"></i>

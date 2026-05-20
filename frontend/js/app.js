@@ -15,7 +15,7 @@ const STEPS = [
   {icon:'ti-check',          label:'Готово'},
 ];
 
-let currentDepth = 'standard';
+let currentDepth = localStorage.getItem('analysisDepth') || 'standard';
 let currentLang = localStorage.getItem('analysisLang') || 'auto';
 let resultSentimentChart = null;
 
@@ -39,12 +39,41 @@ let resultSentimentChart = null;
       localStorage.setItem('analysisLang', currentLang);
     });
   }
+  restoreDepthSelection();
 })();
 
 /* ── DEPTH ────────────────────────────────────────────────────────── */
 function setDepth(d){
   currentDepth = d;
-  document.querySelectorAll('.depth-btn').forEach(b=>b.classList.toggle('active', b.dataset.depth===d));
+  localStorage.setItem('analysisDepth', d);
+
+  document.querySelectorAll('.depth-btn').forEach(btn => {
+    const isActive = btn.dataset.depth === d;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+
+  const labels = {
+    fast: 'Швидкий режим: менше джерел, швидший результат',
+    standard: 'Стандартний режим: баланс швидкості та якості',
+    deep: 'Глибокий режим: більше джерел і детальніший аналіз'
+  };
+
+  setStatus('', labels[d] || 'Режим аналізу змінено');
+}
+
+function restoreDepthSelection(){
+  const allowed = ['fast', 'standard', 'deep'];
+
+  if (!allowed.includes(currentDepth)) {
+    currentDepth = 'standard';
+  }
+
+  document.querySelectorAll('.depth-btn').forEach(btn => {
+    const isActive = btn.dataset.depth === currentDepth;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
 }
 
 /* ── STATUS ───────────────────────────────────────────────────────── */
