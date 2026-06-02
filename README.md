@@ -1,6 +1,6 @@
-# WebAnalyzer v3
+# WebAnalyzer
 
-**WebAnalyzer v3** — вебзастосунок для автоматичного збору, аналізу, збереження та візуалізації інформації з веб-джерел.
+**WebAnalyzer** — вебзастосунок для автоматичного збору, аналізу, збереження та візуалізації інформації з веб-джерел.
 
 Проєкт реалізований як дипломна робота і демонструє повний цикл роботи інформаційної системи: авторизація користувачів, безпечне збереження API-ключів, пошук інформації, AI-аналіз, історія результатів, експорт, публічні посилання, статистика та API-документація.
 
@@ -168,8 +168,8 @@ webanalyzer_v3/
 ### 1. Клонувати проєкт
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/webanalyzer_v3.git
-cd webanalyzer_v3
+git clone https://github.com/Merl0k/webanalyzer.git
+cd webanalyzer
 ```
 
 ### 2. Створити `.env`
@@ -475,35 +475,6 @@ Docker build винесений у ручний запуск через `workflo
 - один спільний backend image для web/worker/flower;
 - виключення `.venv`, `venv`, логів, локальних баз і кешів із Docker context;
 - окремий `requirements-test.txt` для тестів.
-
----
-
-## Реалізовано по ТЗ
-
-| Функція | Статус |
-|---|---|
-| Реєстрація / авторизація | ✅ |
-| JWT + refresh token | ✅ |
-| httpOnly cookie | ✅ |
-| bcrypt | ✅ |
-| Fernet encryption | ✅ |
-| AI-провайдери Gemini / Groq / Ollama | ✅ |
-| Fast / Standard / Deep | ✅ |
-| Вибір мови відповіді | ✅ |
-| Celery worker | ✅ |
-| Redis | ✅ |
-| PostgreSQL | ✅ |
-| Історія аналізів | ✅ |
-| Export JSON / Markdown / PDF | ✅ |
-| Share links | ✅ |
-| Tags | ✅ |
-| Compare UI | ✅ |
-| Donut chart | ✅ |
-| Stats page | ✅ |
-| Swagger/OpenAPI | ✅ |
-| Docker Compose | ✅ |
-| Pytest tests | ✅ |
-| GitHub Actions | ✅ |
 
 ---
 
