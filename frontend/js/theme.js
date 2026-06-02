@@ -259,6 +259,77 @@
     setTimeout(() => btn.classList.remove('rippling'), 400);
   });
 
+  function buildMobileNav(){
+  const nav = document.querySelector('.nav');
+
+  if (!nav || document.getElementById('mobileNavToggle')) {
+    return;
+  }
+
+  const toggle = document.createElement('button');
+  toggle.id = 'mobileNavToggle';
+  toggle.className = 'mobile-nav-toggle';
+  toggle.type = 'button';
+  toggle.setAttribute('aria-label', 'Відкрити меню');
+  toggle.setAttribute('aria-expanded', 'false');
+
+  toggle.innerHTML = `
+    <i class="ti ti-menu-2"></i>
+    <span>Меню</span>
+  `;
+
+  const logo = nav.querySelector('.nav-logo');
+
+  if (logo) {
+    logo.insertAdjacentElement('afterend', toggle);
+  } else {
+    nav.prepend(toggle);
+  }
+
+  function closeMobileNav(){
+    nav.classList.remove('mobile-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.innerHTML = `
+      <i class="ti ti-menu-2"></i>
+      <span>Меню</span>
+    `;
+  }
+
+  toggle.addEventListener('click', event => {
+    event.stopPropagation();
+
+    const isOpen = nav.classList.toggle('mobile-open');
+
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+    toggle.innerHTML = isOpen
+      ? `
+        <i class="ti ti-x"></i>
+        <span>Закрити</span>
+      `
+      : `
+        <i class="ti ti-menu-2"></i>
+        <span>Меню</span>
+      `;
+  });
+
+  nav.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', closeMobileNav);
+  });
+
+  document.addEventListener('click', event => {
+    if (!nav.contains(event.target)) {
+      closeMobileNav();
+    }
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      closeMobileNav();
+    }
+  });
+}
+  buildMobileNav();
   buildThemePicker();
   updateThemeUi();
 

@@ -25,7 +25,6 @@
       <i class="ti ti-palette"></i>
       <span class="theme-trigger-text">Тема</span>
     </button>
-    <button class="btn btn-ghost" id="logoutBtn" style="font-size:12px;padding:.35rem .75rem;display:none" onclick="logout()"><i class="ti ti-logout"></i> Вийти</button>
     <a class="btn btn-ghost" href="auth.html" id="loginBtn" style="font-size:12px;padding:.35rem .75rem"><i class="ti ti-login"></i> Увійти</a>
   </div>
 </nav>
@@ -38,9 +37,12 @@
 
   <div class="card anim-2" style="margin-bottom:1rem">
     <div class="card-body">
-      <div style="display:flex;gap:.6rem;margin-bottom:.75rem">
-        <input class="input" id="queryInput" placeholder="Введіть запит: тема, подія, технологія…" style="flex:1"/>
-        <button class="btn btn-primary" id="searchBtn" onclick="runSearch()"><i class="ti ti-search"></i> <span>Аналізувати</span></button>
+      <div class="search-row">
+        <input class="input" id="queryInput" placeholder="Введіть запит: тема, подія, технологія…"/>
+        <button class="btn btn-primary" id="searchBtn" onclick="runSearch()">
+          <i class="ti ti-search"></i>
+          <span>Аналізувати</span>
+        </button>
       </div>
       <div class="depth-selector" id="depthSelector">
   <button class="depth-btn" data-depth="fast" onclick="setDepth('fast')" aria-pressed="false">

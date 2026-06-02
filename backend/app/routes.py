@@ -13,6 +13,27 @@ import jwt as pyjwt
 
 bp = Blueprint("api", __name__, url_prefix="/api/v1")
 
+@bp.route("/", methods=["GET"], strict_slashes=False)
+def api_index():
+    return jsonify(
+        {
+            "name": "WebAnalyzer v3 API",
+            "version": "3.0.0",
+            "status": "ok",
+            "docs": "/api/v1/docs",
+            "openapi": "/api/v1/openapi.json",
+            "health": "/api/v1/health",
+            "endpoints": {
+                "auth": "/api/v1/auth",
+                "analyze": "/api/v1/analyze",
+                "history": "/api/v1/history",
+                "stats": "/api/v1/stats",
+                "tags": "/api/v1/tags",
+                "compare": "/api/v1/compare",
+            },
+        }
+    )
+
 # ── AUTH ──────────────────────────────────────────────────────────────────────
 
 @bp.route("/auth/register", methods=["POST"])
