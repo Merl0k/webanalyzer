@@ -73,8 +73,11 @@
             <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite · free/fast</option>
             <option value="gemini-2.5-flash">gemini-2.5-flash · quality</option>
             <option value="gemini-2.5-pro">gemini-2.5-pro · advanced</option>
-          </select> 
-          <button class="btn btn-ghost" onclick="saveKey('gemini')" style="flex-shrink:0"><i class="ti ti-device-floppy"></i></button>
+          </select> <!-- <button class="btn btn-ghost" onclick="saveKey('gemini')" style="flex-shrink:0"><i class="ti ti-device-floppy"></i></button> -->
+          <button class="btn btn-primary api-key-save-btn" onclick="saveKey('gemini')">
+            <i class="ti ti-key"></i>
+            <span>Зберегти Gemini</span>
+          </button>
           <button class="btn btn-danger" onclick="deleteKey('gemini')" style="flex-shrink:0"><i class="ti ti-trash"></i></button>
         </div>
       </div>
@@ -92,7 +95,10 @@
             <option value="llama-3.1-8b-instant">llama-3.1-8b</option>
             <option value="mixtral-8x7b-32768">mixtral-8x7b</option>
           </select>
-          <button class="btn btn-ghost" onclick="saveKey('groq')" style="flex-shrink:0"><i class="ti ti-device-floppy"></i></button>
+          <button class="btn btn-primary api-key-save-btn" onclick="saveKey('groq')">
+            <i class="ti ti-key"></i>
+            <span>Зберегти Groq</span>
+          </button>
           <button class="btn btn-danger" onclick="deleteKey('groq')" style="flex-shrink:0"><i class="ti ti-trash"></i></button>
         </div>
       </div>
@@ -110,7 +116,10 @@
             <option value="llama3.2:3b">llama3.2:3b</option>
             <option value="mistral:7b">mistral:7b</option>
           </select>
-          <button class="btn btn-ghost" onclick="saveKey('ollama')" style="flex-shrink:0"><i class="ti ti-device-floppy"></i></button>
+          <button class="btn btn-primary api-key-save-btn" onclick="saveKey('ollama')">
+            <i class="ti ti-key"></i>
+            <span>Зберегти Ollama</span>
+          </button>
           <button class="btn btn-danger" onclick="deleteKey('ollama')" style="flex-shrink:0"><i class="ti ti-trash"></i></button>
         </div>
       </div>

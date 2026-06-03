@@ -225,3 +225,48 @@ def test_user_cannot_access_another_users_history(app):
     )
 
     assert compare.status_code == 404
+
+def test_collections_create_add_filter_remove_delete(auth_client):
+    client, user = auth_client
+
+    search_id = create_saved_search(user["id"], query="Collection result")
+
+    create_col = client.post(
+        "/api/v1/collections",
+        json={
+            "name": "Диплом",
+            "description": "Матеріали для дипломної роботи",
+        },
+    )
+
+    assert create_col.status_code == 200
+
+    col = create_col.get_json()
+    col_id = col["id"]
+
+    add = client.post(f"/api/v1/collections/{col_id}/add/{search_id}")
+
+    assert add.status_code == 200
+
+    detail = client.get(f"/api/v1/history/{search_id}")
+
+    assert detail.status_code == 200
+    assert any(c["id"] == col_id for c in detail.get_json()["collections"])
+
+    filtered = client.get(f"/api/v1/history?collection_id={col_id}")
+
+    assert filtered.status_code == 200
+    assert any(row["id"] == search_id for row in filtered.get_json())
+
+    remove = client.delete(f"/api/v1/collections/{col_id}/remove/{search_id}")
+
+    assert remove.status_code == 200
+
+    detail_after_remove = client.get(f"/api/v1/history/{search_id}")
+
+    assert detail_after_remove.status_code == 200
+    assert not any(c["id"] == col_id for c in detail_after_remove.get_json()["collections"])
+
+    delete_col = client.delete(f"/api/v1/collections/{col_id}")
+
+    assert delete_col.status_code == 200

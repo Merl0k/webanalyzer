@@ -7,6 +7,8 @@ let compareChart = null;
 let allTags = [];
 let activeTagId = null;
 let openedDetailId = null;
+let allCollections = [];
+let activeCollectionId = null;
 
 const SENT_LABEL = { positive: 'Позитивна', negative: 'Негативна', neutral: 'Нейтральна', mixed: 'Змішана' };
 const SENT_PILL  = { positive: 'pill-pos',  negative: 'pill-neg',  neutral: 'pill-neu',   mixed: 'pill-mix' };
@@ -33,6 +35,9 @@ async function loadHistory(offset = 0) {
 
     if (activeTagId) {
       params.set('tag_id', activeTagId);
+    }
+    if (activeCollectionId) {
+      params.set('collection_id', activeCollectionId);
     }
 
     const resp = await fetch(`${API_BASE}/history?${params.toString()}`, {
@@ -307,6 +312,35 @@ async function openDetail(id) {
 
           <div class="detail-tags-list">
             ${resultTags}
+          </div>
+        </div>
+        <div class="detail-collections-box">
+          <div class="detail-collections-head">
+            <div>
+              <i class="ti ti-folder"></i>
+              <span>Колекції результату</span>
+            </div>
+
+            <select class="collection-select" id="detailCollectionSelect">
+              <option value="">Додати в колекцію...</option>
+              ${allCollections.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join('')}
+            </select>
+
+            <button class="btn btn-primary mini-btn" onclick="addOpenedDetailToCollection()">
+              <i class="ti ti-plus"></i> Додати
+            </button>
+          </div>
+
+          <div class="detail-collections-list">
+            ${(r.collections || []).length ? (r.collections || []).map(c => `
+              <span class="detail-collection">
+                <i class="ti ti-folder"></i>
+                ${escHtml(c.name)}
+                <button onclick="removeOpenedDetailFromCollection(event, ${c.id})" title="Прибрати з колекції">
+                  <i class="ti ti-x"></i>
+                </button>
+              </span>
+            `).join('') : '<span class="muted-small">Результат ще не додано в колекції</span>'}
           </div>
         </div>
 
@@ -876,9 +910,225 @@ async function removeTagFromOpenedDetail(event, tagId) {
   }
 }
 
+async function loadCollections() {
+  try {
+    const resp = await fetch(`${API_BASE}/collections`, {
+      credentials: 'include'
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(data.error || 'Не вдалося завантажити колекції');
+    }
+
+    allCollections = Array.isArray(data) ? data : [];
+    renderCollectionFilters();
+
+  } catch (err) {
+    console.warn('Collections load failed:', err);
+  }
+}
+
+function renderCollectionFilters() {
+  const box = document.getElementById('collectionFilterList');
+
+  if (!box) {
+    return;
+  }
+
+  const allActive = activeCollectionId === null ? 'active' : '';
+
+  box.innerHTML = `
+    <button class="collection-filter ${allActive}" onclick="setCollectionFilter(null)">
+      <i class="ti ti-layout-grid"></i>
+      Усі колекції
+    </button>
+
+    ${allCollections.map(col => `
+      <button
+        class="collection-filter ${Number(activeCollectionId) === Number(col.id) ? 'active' : ''}"
+        onclick="setCollectionFilter(${col.id})"
+        title="${escAttr(col.description || '')}"
+      >
+        <i class="ti ti-folder"></i>
+        <span>${escHtml(col.name)}</span>
+        <strong>${col.count || 0}</strong>
+        <button class="collection-delete-mini" onclick="deleteCollection(event, ${col.id})" title="Видалити колекцію">
+          ×
+        </button>
+      </button>
+    `).join('')}
+  `;
+}
+
+function setCollectionFilter(collectionId) {
+  activeCollectionId = collectionId;
+  currentOffset = 0;
+
+  // Щоб фільтри не конфліктували, при виборі колекції прибираємо активний тег.
+  if (collectionId) {
+    activeTagId = null;
+    renderTagFilters();
+  }
+
+  renderCollectionFilters();
+  loadHistory();
+
+  setStatus('done', collectionId ? 'Фільтр за колекцією застосовано' : 'Показано всі результати');
+}
+
+async function createCollectionFromInput() {
+  const nameInput = document.getElementById('newCollectionName');
+  const descInput = document.getElementById('newCollectionDesc');
+
+  const name = (nameInput?.value || '').trim();
+  const description = (descInput?.value || '').trim();
+
+  if (!name) {
+    setStatus('error', 'Введіть назву колекції');
+    return;
+  }
+
+  try {
+    const resp = await fetch(`${API_BASE}/collections`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, description })
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(data.error || 'Не вдалося створити колекцію');
+    }
+
+    if (nameInput) nameInput.value = '';
+    if (descInput) descInput.value = '';
+
+    await loadCollections();
+
+    setStatus('done', 'Колекцію створено');
+
+  } catch (err) {
+    setStatus('error', err.message);
+    alert('Помилка створення колекції: ' + err.message);
+  }
+}
+
+async function addOpenedDetailToCollection() {
+  if (!openedDetailId) {
+    setStatus('error', 'Результат не відкрито');
+    return;
+  }
+
+  const select = document.getElementById('detailCollectionSelect');
+  const collectionId = select?.value;
+
+  if (!collectionId) {
+    setStatus('error', 'Оберіть колекцію');
+    return;
+  }
+
+  try {
+    const resp = await fetch(`${API_BASE}/collections/${collectionId}/add/${openedDetailId}`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(data.error || 'Не вдалося додати в колекцію');
+    }
+
+    setStatus('done', 'Результат додано в колекцію');
+
+    await loadCollections();
+    await openDetail(openedDetailId);
+    await loadHistory(currentOffset);
+
+  } catch (err) {
+    setStatus('error', err.message);
+    alert('Помилка додавання в колекцію: ' + err.message);
+  }
+}
+
+async function removeOpenedDetailFromCollection(event, collectionId) {
+  event.stopPropagation();
+
+  if (!openedDetailId) {
+    setStatus('error', 'Результат не відкрито');
+    return;
+  }
+
+  try {
+    const resp = await fetch(`${API_BASE}/collections/${collectionId}/remove/${openedDetailId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(data.error || 'Не вдалося прибрати з колекції');
+    }
+
+    setStatus('done', 'Результат прибрано з колекції');
+
+    await loadCollections();
+    await openDetail(openedDetailId);
+    await loadHistory(currentOffset);
+
+  } catch (err) {
+    setStatus('error', err.message);
+    alert('Помилка видалення з колекції: ' + err.message);
+  }
+}
+
+async function deleteCollection(event, collectionId) {
+  event.stopPropagation();
+
+  const ok = confirm('Видалити цю колекцію? Результати аналізу не будуть видалені.');
+
+  if (!ok) {
+    return;
+  }
+
+  try {
+    const resp = await fetch(`${API_BASE}/collections/${collectionId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(data.error || 'Не вдалося видалити колекцію');
+    }
+
+    if (Number(activeCollectionId) === Number(collectionId)) {
+      activeCollectionId = null;
+    }
+
+    await loadCollections();
+    await loadHistory(0);
+
+    setStatus('done', 'Колекцію видалено');
+
+  } catch (err) {
+    setStatus('error', err.message);
+    alert('Помилка видалення колекції: ' + err.message);
+  }
+}
+
 // boot
 // boot
 (async function bootHistoryPage() {
   await loadTags();
+  await loadCollections();
   await loadHistory();
 })();

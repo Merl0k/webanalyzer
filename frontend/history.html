@@ -59,6 +59,29 @@
       </button>
     </div>
   </div>
+    <div class="collections-panel anim-2">
+    <div class="collections-panel-head">
+      <div class="collections-panel-title">
+        <i class="ti ti-folder"></i>
+        <span>Колекції</span>
+      </div>
+
+      <div class="collection-create">
+        <input id="newCollectionName" class="collection-input" type="text" placeholder="Назва колекції..." maxlength="64">
+        <input id="newCollectionDesc" class="collection-input collection-desc-input" type="text" placeholder="Опис..." maxlength="160">
+
+        <button class="btn btn-primary mini-btn" onclick="createCollectionFromInput()">
+          <i class="ti ti-plus"></i> Створити
+        </button>
+      </div>
+    </div>
+
+    <div class="collection-filter-list" id="collectionFilterList">
+      <button class="collection-filter active" onclick="setCollectionFilter(null)">
+        Усі колекції
+      </button>
+    </div>
+  </div>
 
   <div class="compare-panel anim-2" id="comparePanel" style="display:none">
     <div class="compare-panel-info">

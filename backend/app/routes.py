@@ -209,9 +209,15 @@ def stream_progress(task_id):
 @bp.route("/history", methods=["GET"])
 @require_auth
 def history():
-    return jsonify(database.get_history(
-        int(request.args.get("limit", 20)), int(request.args.get("offset", 0)),
-        g.user_id, request.args.get("tag_id", type=int)))
+    return jsonify(
+        database.get_history(
+            int(request.args.get("limit", 20)),
+            int(request.args.get("offset", 0)),
+            g.user_id,
+            request.args.get("tag_id", type=int),
+            request.args.get("collection_id", type=int),
+        )
+    )
 
 @bp.route("/history/<int:search_id>", methods=["GET"])
 @require_auth
@@ -314,6 +320,26 @@ def add_to_collection(col_id, search_id):
 
     return jsonify({"ok": True})
 
+@bp.route("/collections/<int:col_id>/remove/<int:search_id>", methods=["DELETE"])
+@require_auth
+def remove_from_collection(col_id, search_id):
+    ok = database.remove_from_collection(search_id, col_id, g.user_id)
+
+    if not ok:
+        return jsonify({"error": "Результат або колекцію не знайдено"}), 404
+
+    return jsonify({"ok": True})
+
+
+@bp.route("/collections/<int:col_id>", methods=["DELETE"])
+@require_auth
+def delete_collection(col_id):
+    ok = database.delete_collection(g.user_id, col_id)
+
+    if not ok:
+        return jsonify({"error": "Колекцію не знайдено"}), 404
+
+    return jsonify({"ok": True})
 # ── EXPORT ────────────────────────────────────────────────────────────────────
 
 @bp.route("/history/<int:search_id>/export/<fmt>", methods=["GET"])

@@ -99,7 +99,7 @@ def save_search(query, result, user_id=None, depth="standard", lang="auto"):
             sources_cnt=len(sources), depth=depth, lang=lang, created_at=datetime.now())
         s.add(r); s.commit(); s.refresh(r); return r.id
 
-def get_history(limit=20, offset=0, user_id=None, tag_id=None):
+def get_history(limit=20, offset=0, user_id=None, tag_id=None, collection_id=None):
     with Session() as s:
         q = s.query(
             Search.id,
@@ -120,6 +120,12 @@ def get_history(limit=20, offset=0, user_id=None, tag_id=None):
             if user_id is not None:
                 q = q.filter(Tag.user_id == user_id)
 
+        if collection_id:
+            q = q.join(Search.collections).filter(Collection.id == collection_id)
+
+            if user_id is not None:
+                q = q.filter(Collection.user_id == user_id)
+
         rows = q.order_by(Search.id.desc()).limit(limit).offset(offset).all()
 
     return [
@@ -137,7 +143,6 @@ def get_history(limit=20, offset=0, user_id=None, tag_id=None):
         for r in rows
     ]
 
-
 def get_search_by_id(search_id, user_id=None):
     with Session() as s:
         q = s.query(Search).filter(Search.id == search_id)
@@ -152,6 +157,14 @@ def get_search_by_id(search_id, user_id=None):
 
         tags = [{"id": t.id, "name": t.name, "color": t.color} for t in r.tags]
 
+        collections = [
+            {
+                "id": c.id,
+                "name": c.name,
+                "description": c.description,
+            }
+            for c in r.collections
+        ]
         return {
             "id": r.id,
             "user_id": r.user_id,
@@ -165,6 +178,7 @@ def get_search_by_id(search_id, user_id=None):
             "depth": r.depth,
             "lang": r.lang,
             "tags": tags,
+            "collections": collections,
             "created_at": r.created_at.strftime("%Y-%m-%d %H:%M:%S")
             if r.created_at
             else "",
@@ -343,6 +357,46 @@ def add_to_collection(search_id, collection_id, user_id):
 
         return True
     
+def remove_from_collection(search_id, collection_id, user_id):
+    with Session() as s:
+        search = (
+            s.query(Search)
+            .filter(Search.id == search_id, Search.user_id == user_id)
+            .first()
+        )
+
+        col = (
+            s.query(Collection)
+            .filter(Collection.id == collection_id, Collection.user_id == user_id)
+            .first()
+        )
+
+        if not search or not col:
+            return False
+
+        if search in col.searches:
+            col.searches.remove(search)
+            s.commit()
+
+        return True
+
+
+def delete_collection(user_id, collection_id):
+    with Session() as s:
+        col = (
+            s.query(Collection)
+            .filter(Collection.id == collection_id, Collection.user_id == user_id)
+            .first()
+        )
+
+        if not col:
+            return False
+
+        s.delete(col)
+        s.commit()
+
+        return True
+
 def get_stats(user_id=None):
     with Session() as s:
         q = s.query(Search)
