@@ -4161,3 +4161,46 @@ video {
     display: none !important;
   }
 }
+
+/* ===================================================================
+   AUTH BUTTON VISIBILITY FIX
+   Prevent mobile CSS from showing hidden login/logout buttons.
+=================================================================== */
+
+.nav-auth-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+}
+
+.nav-auth-btn {
+  font-size: 12px;
+  padding: .35rem .75rem;
+}
+
+.nav-auth-btn span {
+  display: inline;
+}
+
+@media (max-width: 720px) {
+  #logoutBtn.nav-auth-hidden,
+  #loginBtn.nav-auth-hidden {
+    display: none !important;
+  }
+
+  #logoutBtn:not(.nav-auth-hidden),
+  #loginBtn:not(.nav-auth-hidden) {
+    display: inline-flex !important;
+  }
+
+  .nav-auth-btn span {
+    display: none !important;
+  }
+}

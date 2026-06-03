@@ -65,6 +65,23 @@ def get_api_key_enc(user_id, provider):
         k = s.query(ApiKey).filter(ApiKey.user_id == user_id, ApiKey.provider == provider).first()
         return k.key_enc if k else None
 
+def get_api_key_record(user_id, provider):
+    with Session() as s:
+        k = (
+            s.query(ApiKey)
+            .filter(ApiKey.user_id == user_id, ApiKey.provider == provider)
+            .first()
+        )
+
+        if not k:
+            return None
+
+        return {
+            "provider": k.provider,
+            "key_enc": k.key_enc,
+            "model": k.model,
+        }   
+
 def delete_api_key(user_id, provider):
     with Session() as s:
         s.query(ApiKey).filter(ApiKey.user_id == user_id, ApiKey.provider == provider).delete()

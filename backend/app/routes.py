@@ -140,20 +140,24 @@ def analyze():
     if not query: return jsonify({"error": "Запит не може бути порожнім"}), 400
     depth_config = {"fast": 5, "standard": 10, "deep": 20}
     max_results  = depth_config.get(depth, 10)
-    api_key = _get_user_api_key(g.user_id)
-    if not api_key:
+    api_config = _get_user_api_config(g.user_id)
+
+    if not api_config:
         return jsonify({"error": "Спочатку додайте API ключ у налаштуваннях профілю"}), 400
+
+    api_key = api_config["api_key"]
+    ai_model = api_config.get("model") or ""
     logger.info(f"[User {g.user_id}] Search: '{query}' depth={depth}")
     cached = get_cached(query, depth=depth, lang=lang)
     if cached:
         return jsonify({**cached, "cached": True})
     try:
         from app.tasks.pipeline_task import run_pipeline
-        task = run_pipeline.delay(query, api_key, g.user_id, depth, max_results, lang)
+        task = run_pipeline.delay(query, api_key, g.user_id, depth, max_results, lang, ai_model)
         return jsonify({"task_id": task.id, "status": "queued"})
     except Exception as e:
         logger.warning(f"Celery unavailable ({e}), running synchronously")
-        result = _pipeline_direct(query, api_key, g.user_id, depth, max_results, lang)
+        result = _pipeline_direct(query, api_key, g.user_id, depth, max_results, lang, ai_model)
         if "error" in result: return jsonify(result), 400
         return jsonify(result)
 
@@ -417,13 +421,24 @@ def health():
 
 # ── HELPERS ───────────────────────────────────────────────────────────────────
 
-def _get_user_api_key(user_id):
-    from app.database.db import get_api_key_enc
+def _get_user_api_config(user_id):
+    from app.database.db import get_api_key_record
+
     for provider in ("gemini", "groq", "ollama"):
-        enc = get_api_key_enc(user_id, provider)
-        if enc:
-            try: return decrypt(enc)
-            except Exception: continue
+        row = get_api_key_record(user_id, provider)
+
+        if not row or not row.get("key_enc"):
+            continue
+
+        try:
+            return {
+                "provider": provider,
+                "api_key": decrypt(row["key_enc"]),
+                "model": row.get("model") or "",
+            }
+        except Exception:
+            continue
+
     return None
 
 def _set_cookie(resp, name, value, max_age):
@@ -443,7 +458,7 @@ def _to_markdown(row):
     for src in row.get("sources",[]): lines.append(f"- [{src.get('title','?')}]({src.get('url','#')})")
     return "\n".join(lines)
 
-def _pipeline_direct(query, api_key, user_id, depth, max_results, lang):
+def _pipeline_direct(query, api_key, user_id, depth, max_results, lang, ai_model=""):
     from app.search.duckduckgo_search import search_web
     from app.search.content_extractor import extract_content_parallel
     from app.semantic.embeddings import create_embedding, create_embeddings_batch
@@ -478,6 +493,7 @@ def _pipeline_direct(query, api_key, user_id, depth, max_results, lang):
         api_key,
         f'Запит: "{query}"{lang_hint}\n\nМатеріали:\n{context}',
         lang=lang,
+        model=ai_model,
     )
     raw = re.sub(r"```json|```","",raw).strip()
     m = re.search(r"\{[\s\S]*\}",raw)

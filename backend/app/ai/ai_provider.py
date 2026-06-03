@@ -9,6 +9,24 @@ LANG_NAMES = {
     "en": "English",
 }
 
+GEMINI_DEFAULT_MODEL = "gemini-2.5-flash-lite"
+
+GEMINI_ALLOWED_MODELS = {
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+}
+
+GROQ_DEFAULT_MODEL = "llama-3.3-70b-versatile"
+
+GROQ_ALLOWED_MODELS = {
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "mixtral-8x7b-32768",
+}
+
+OLLAMA_DEFAULT_MODEL = "qwen2.5:3b"
+
 
 def build_system_prompt(lang: str = "auto") -> str:
     """
@@ -82,8 +100,43 @@ def detect_provider(api_key: str) -> str:
     return "gemini"
 
 
-def call_groq(api_key: str, user_message: str, system_prompt: str) -> str:
-    logger.info("Calling Groq API (llama-3.3-70b-versatile)")
+def normalize_model(provider: str, model: str | None = None) -> str:
+    """
+    Normalize selected model.
+
+    Important:
+    old Gemini models like gemini-1.5-* and gemini-2.0-* are no longer safe,
+    so they are automatically replaced with gemini-2.5-flash-lite.
+    """
+    model = (model or "").strip()
+
+    if provider == "gemini":
+        if model in GEMINI_ALLOWED_MODELS:
+            return model
+
+        return GEMINI_DEFAULT_MODEL
+
+    if provider == "groq":
+        if model in GROQ_ALLOWED_MODELS:
+            return model
+
+        return GROQ_DEFAULT_MODEL
+
+    if provider == "ollama":
+        return model or OLLAMA_DEFAULT_MODEL
+
+    return model
+
+
+def call_groq(
+    api_key: str,
+    user_message: str,
+    system_prompt: str,
+    model: str | None = None,
+) -> str:
+    model = normalize_model("groq", model)
+
+    logger.info(f"Calling Groq API ({model})")
 
     resp = requests.post(
         "https://api.groq.com/openai/v1/chat/completions",
@@ -92,7 +145,7 @@ def call_groq(api_key: str, user_message: str, system_prompt: str) -> str:
             "Content-Type": "application/json",
         },
         json={
-            "model": "llama-3.3-70b-versatile",
+            "model": model,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message},
@@ -111,8 +164,10 @@ def call_groq(api_key: str, user_message: str, system_prompt: str) -> str:
 def call_ollama(
     user_message: str,
     system_prompt: str,
-    model: str = "qwen2.5:3b",
+    model: str | None = None,
 ) -> str:
+    model = normalize_model("ollama", model)
+
     logger.info(f"Calling Ollama local model: {model}")
 
     resp = requests.post(
@@ -133,32 +188,45 @@ def call_ollama(
     return resp.json()["message"]["content"]
 
 
-def call_gemini(api_key: str, user_message: str, system_prompt: str) -> str:
-    logger.info("Calling Gemini API (gemini-2.0-flash)")
+def call_gemini(
+    api_key: str,
+    user_message: str,
+    system_prompt: str,
+    model: str | None = None,
+) -> str:
+    model = normalize_model("gemini", model)
+
+    logger.info(f"Calling Gemini API ({model})")
 
     import google.generativeai as genai
 
     genai.configure(api_key=api_key)
 
-    model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
+    gemini_model = genai.GenerativeModel(
+        model_name=model,
         system_instruction=system_prompt,
     )
 
-    return model.generate_content(user_message).text
+    return gemini_model.generate_content(user_message).text
 
 
-def generate(api_key: str, user_message: str, lang: str = "auto") -> str:
+def generate(
+    api_key: str,
+    user_message: str,
+    lang: str = "auto",
+    model: str | None = None,
+) -> str:
     """
     Route request to the correct AI provider based on API key.
     """
     provider = detect_provider(api_key)
     system_prompt = build_system_prompt(lang)
+    model = normalize_model(provider, model)
 
     if provider == "groq":
-        return call_groq(api_key, user_message, system_prompt)
+        return call_groq(api_key, user_message, system_prompt, model=model)
 
     if provider == "ollama":
-        return call_ollama(user_message, system_prompt)
+        return call_ollama(user_message, system_prompt, model=model)
 
-    return call_gemini(api_key, user_message, system_prompt)
+    return call_gemini(api_key, user_message, system_prompt, model=model)

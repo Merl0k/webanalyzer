@@ -128,22 +128,24 @@ def run_pipeline(
     depth: str = "standard",
     max_results: int = 10,
     lang: str = "auto",
+    model: str = "",
 ) -> dict[str, Any]:
     """
     Execute the full Hybrid AI Search Pipeline as a background Celery task.
 
     Arguments must match app/routes.py:
-        run_pipeline.delay(query, api_key, g.user_id, depth, max_results, lang)
+        run_pipeline.delay(query, api_key, g.user_id, depth, max_results, lang, model)
     """
     task_id = self.request.id
     logger.info(
-        "[Task %s] Starting pipeline query=%r user_id=%s depth=%s max_results=%s lang=%s",
+        "[Task %s] Starting pipeline query=%r user_id=%s depth=%s max_results=%s lang=%s model=%s",
         task_id,
         query,
         user_id,
         depth,
         max_results,
         lang,
+        model,
     )
 
     try:
@@ -301,7 +303,7 @@ def run_pipeline(
             f"Матеріали:\n{context}"
         )
 
-        raw_text = generate(api_key, user_message, lang=lang)
+        raw_text = generate(api_key, user_message, lang=lang, model=model)
 
         # Step 6: Parse result
         _push_progress(task_id, 6, total_steps, "Обробка результатів…")

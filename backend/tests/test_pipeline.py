@@ -22,6 +22,17 @@ def test_detect_provider_gemini():
     assert detect_provider("AIzaSy_anything") == "gemini"
     assert detect_provider("random_key") == "gemini"
 
+def test_normalize_old_gemini_model_to_default():
+    from app.ai.ai_provider import normalize_model
+
+    assert normalize_model("gemini", "gemini-2.0-flash") == "gemini-2.5-flash-lite"
+    assert normalize_model("gemini", "gemini-1.5-flash") == "gemini-2.5-flash-lite"
+
+
+def test_normalize_valid_gemini_model():
+    from app.ai.ai_provider import normalize_model
+
+    assert normalize_model("gemini", "gemini-2.5-flash") == "gemini-2.5-flash"
 
 def test_build_system_prompt_lang_ru():
     from app.ai.ai_provider import build_system_prompt
